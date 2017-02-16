@@ -59,6 +59,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                 history.get(history.size() - 1).setAnswer(message.getText());
             }
 
+            if(history.size() == 20){
+                //TODO : guess
+            }
+
         } else if (helper.isMyTurn(message.getText()) != null) {
 
             //TODO : send your question
