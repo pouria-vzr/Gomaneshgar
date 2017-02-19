@@ -19,6 +19,8 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     //list of questions in game
     public static List<Question> history;
+    public static Question currentState;
+    public static int questionNumber;
     private Helper helper;
 
     public TelegramBot() {
@@ -53,20 +55,28 @@ public class TelegramBot extends TelegramLongPollingBot {
         if (message.getText().equalsIgnoreCase("حدس")) {
 
             //TODO : guess
+            sendMessage("***");
 
         } else if (message.getText().equalsIgnoreCase("بله") || message.getText().equalsIgnoreCase("خیر")) {
-            if (history.size() != 0) {
-                history.get(history.size() - 1).setAnswer(message.getText());
+            if (currentState != null){
+                currentState.setAnswer(message.getText());
+                history.add(currentState);
             }
 
             if(history.size() == 20){
                 //TODO : guess
+                sendMessage("***");
             }
 
         } else if (helper.isMyTurn(message.getText()) != null) {
 
             //TODO : send your question
+            String myQuestion = "***";
+            sendNormalQuestion(myQuestion);
             //TODO : add your Question to history
+            Question question = new Question();
+            question.setQuestion(myQuestion);
+            currentState = question;
 
         } else if (helper.isQuestion(message.getText())) {
 
@@ -75,12 +85,14 @@ public class TelegramBot extends TelegramLongPollingBot {
         } else if (message.getText().equalsIgnoreCase("پایان")) {
 
             //TODO : end of the game
+            sendMessage("guess");
 
             history.clear();
 
         } else if (message.getText().equalsIgnoreCase("آغاز") || message.getText().equalsIgnoreCase("اغاز")) {
 
             //TODO : introduce yourself if you want
+            sendMessage("***");
 
         }
 

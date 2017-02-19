@@ -1,5 +1,5 @@
 # Gomaneshgar
-Simple Telegram Bot Template For Playing 20 Question Game
+Simple Telegram Bot Template For Playing 20 Questions Game
 
 ##Config
 initial fields in BotConfig.java
