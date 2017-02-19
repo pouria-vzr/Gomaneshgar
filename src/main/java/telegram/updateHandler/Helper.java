@@ -38,7 +38,7 @@ public class Helper {
             Question question = new Question();
             question.setQuestion(m.group(m.groupCount()));
             question.setBotUsername(m.group(1) + "bot");
-            TelegramBot.history.add(question);
+            TelegramBot.currentState = question;
             return true;
         } else {
             return false;

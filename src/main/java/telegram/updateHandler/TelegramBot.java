@@ -76,6 +76,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             //TODO : add your Question to history
             Question question = new Question();
             question.setQuestion(myQuestion);
+            question.setBotUsername(BotConfig.BOT_USERNAME);
             currentState = question;
 
         } else if (helper.isQuestion(message.getText())) {
