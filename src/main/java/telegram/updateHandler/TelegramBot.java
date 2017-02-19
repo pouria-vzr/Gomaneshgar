@@ -25,7 +25,9 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     public TelegramBot() {
         history = new ArrayList<Question>();
+        questionNumber = 0;
         helper = new Helper();
+
     }
 
     @Override
@@ -61,9 +63,10 @@ public class TelegramBot extends TelegramLongPollingBot {
             if (currentState != null){
                 currentState.setAnswer(message.getText());
                 history.add(currentState);
+                questionNumber++;
             }
 
-            if(history.size() == 20){
+            if(questionNumber == 20){
                 //TODO : guess
                 sendMessage("***");
             }
