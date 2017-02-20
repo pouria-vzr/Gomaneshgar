@@ -2,12 +2,16 @@
 Simple Telegram Bot Template For Playing 20 Questions Game
 
 ##Config
-initial fields in BotConfig.java
+Use JDK 1.8 or 1.7
+Initial fields in BotConfig.java
+Just import libraries to your project with Maven Central Repository
+All dependencies exist in pom.xml
 
 ##Description
-write your result code in TelegramBot.java.
-there is a history variable in TelegramBot.java that stores all questions with their answer from another bots.
+Write your result code in TelegramBot.java.
+There is a history variable in TelegramBot.java that stores all questions with their answer from another bots.
 
 ##How to run?
-just run Main.java
+Just run Main.java
+
 
