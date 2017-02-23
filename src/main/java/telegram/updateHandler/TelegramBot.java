@@ -19,25 +19,30 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     //list of questions in game
     public static List<Question> history;
+    //current question in game
     public static Question currentState;
+    //number of question
     public static int questionNumber;
     private Helper helper;
+    //this shows that a question is asked or not
+    private boolean isQuestionExist;
 
     public TelegramBot() {
         history = new ArrayList<Question>();
         questionNumber = 0;
         helper = new Helper();
-
+        isQuestionExist = false;
     }
 
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
+            System.out.println(update.getMessage().getChatId());
             if (update.getMessage().getChatId() == Long.parseLong(BotConfig.GROUP_ID)) {
                 //20 question game treat
                 handelIncomingMessage(update.getMessage());
             } else {
-                //ordinary teat
+                //ordinary treat
             }
         }
     }
@@ -54,19 +59,22 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     public void handelIncomingMessage(Message message) {
 
-        if (message.getText().equalsIgnoreCase("حدس")) {
+        if (message.getText().equals("حدس")) {
 
             //TODO : guess
             sendMessage("***");
 
-        } else if (message.getText().equalsIgnoreCase("بله") || message.getText().equalsIgnoreCase("خیر")) {
-            if (currentState != null){
+        } else if (message.getText().equals("بله") || message.getText().equals("خیر") || message.getText().equals("نمی دانم")) {
+            if (currentState != null && isQuestionExist == true) {
                 currentState.setAnswer(message.getText());
                 history.add(currentState);
                 questionNumber++;
+//                String test = currentState.getBotUsername() + "\n" + "Q = " + currentState.getQuestion() + "\n" + "A = " + currentState.getAnswer() + "\n" + "Q num = " + questionNumber;
+//                sendMessage(test);
+                isQuestionExist = false;
             }
 
-            if(questionNumber == 20){
+            if (questionNumber % 20 == 0 && questionNumber != 0) {
                 //TODO : guess
                 sendMessage("***");
             }
@@ -81,19 +89,23 @@ public class TelegramBot extends TelegramLongPollingBot {
             question.setQuestion(myQuestion);
             question.setBotUsername(BotConfig.BOT_USERNAME);
             currentState = question;
+            isQuestionExist = true;
 
         } else if (helper.isQuestion(message.getText())) {
 
+            isQuestionExist = true;
             //question from other bots
 
-        } else if (message.getText().equalsIgnoreCase("پایان")) {
+        } else if (message.getText().equals("پایان")) {
 
             //TODO : end of the game
             sendMessage("guess");
 
             history.clear();
+            questionNumber = 0;
+            isQuestionExist = false;
 
-        } else if (message.getText().equalsIgnoreCase("آغاز") || message.getText().equalsIgnoreCase("اغاز")) {
+        } else if (message.getText().equals("آغاز") || message.getText().equals("اغاز")) {
 
             //TODO : introduce yourself if you want
             sendMessage("***");
