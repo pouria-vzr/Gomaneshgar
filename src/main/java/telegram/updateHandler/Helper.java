@@ -17,7 +17,7 @@ public class Helper {
     Pattern turn;
 
     public Helper() {
-        questionPattern = "@(.*)bot :(\\n+)([^\\n]*)";
+        questionPattern = "@(.*)bot(.*):(\\n+)([^\\n]*)";
         turnPattern = "([۱۲۳۴۵۶۷۸۹۰]+). @" + BotConfig.BOT_USERNAME;
         question = Pattern.compile(questionPattern);
         turn = Pattern.compile(turnPattern);

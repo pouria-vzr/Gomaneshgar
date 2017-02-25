@@ -38,6 +38,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
             System.out.println(update.getMessage().getChatId());
+            System.out.println(update.getMessage().getText());
             if (update.getMessage().getChatId() == Long.parseLong(BotConfig.GROUP_ID)) {
                 //20 question game treat
                 handelIncomingMessage(update.getMessage());
