@@ -6,7 +6,7 @@ import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 import telegram.BotConfig;
-import telegram.model.Question;
+import telegram.model.QResp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,34 +16,72 @@ import java.util.List;
  */
 public class TelegramBot extends TelegramLongPollingBot {
 
-
-    //list of questions in game
-    public static List<Question> history;
-    //current question in game
-    public static Question currentState;
-    //number of question
-    public static int questionNumber;
-    private Helper helper;
-    //this shows that a question is asked or not
-    private boolean isQuestionExist;
+    // list of question-responses in game
+    public static List<QResp> history;
+    // current question-responses in game 
+    public static QResp qr;
 
     public TelegramBot() {
-        history = new ArrayList<Question>();
-        questionNumber = 0;
-        helper = new Helper();
-        isQuestionExist = false;
+        history = new ArrayList<QResp>(100); // initialize with a capacity for 100 question-responses
+        qr = new QResp();
     }
 
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            System.out.println(update.getMessage().getChatId());
-            System.out.println(update.getMessage().getText());
-            if (update.getMessage().getChatId() == Long.parseLong(BotConfig.GROUP_ID)) {
-                //20 question game treat
-                handelIncomingMessage(update.getMessage());
-            } else {
-                //ordinary treat
+            Message msg = update.getMessage();
+            long chat_id = msg.getChatId();
+            String msgtxt = msg.getText();
+
+            if (chat_id != BotConfig.GROUP_ID) {
+                // ordinary behavior
+            } else {   // the 20 question game behavior
+                if (msgtxt.equals("آغاز")) {
+                    sendMessage(myIntro());
+                } else if (msgtxt.equals("پایان")) {
+                    history.clear();
+                } else if (msgtxt.equals("حدس")) {
+                    String guess = make_a_guess();
+                    sendMessage(guess);
+                } else if (msgtxt.equals("بله") || msgtxt.equals("خیر") || msgtxt.equals("نمی دانم") || msgtxt.equals("نمیدانم")) {
+                    qr.answer = msgtxt;
+                    history.add(qr);
+
+                    if (qr.n % 20 == 0) {
+                        String guess = make_a_guess();
+                        sendMessage(guess);
+                    } else if (hasAnyPointForVanehasht()) {
+                        String guess = make_a_guess();
+                        sendMessage(">>> " + guess);
+                    }
+                } else {
+                    QResp qrtodo = Helper.isTurnMsg(msgtxt);
+                    if (qrtodo != null) {  // A "turn" message received
+                        qr = new QResp();
+                        qr.n = qrtodo.n;
+                        qr.asker = qrtodo.asker;
+                        if (qr.asker.equals(BotConfig.BOT_USERNAME)) {  // That is my turn.
+                            String ques;
+                            if (hasAnyPointForDirectQ()) {
+                                String guess = make_a_guess();
+                                ques = "* " + guess + "؟";
+                            } else {
+                                ques = choose_a_question();
+                            }
+                            sendMessage(ques);
+                        }
+                    } else {
+                        QResp qrongoing = Helper.isQMsg(msgtxt);
+                        if (qrongoing != null) {  // A "question" received. (copied and resent by admin)
+                            qr.asker = qrongoing.asker;
+                            qr.question = qrongoing.question;
+                            if (hasAnyPointForVanehasht()) {
+                                String guess = make_a_guess();
+                                sendMessage(">>> " + guess);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -58,118 +96,39 @@ public class TelegramBot extends TelegramLongPollingBot {
         return BotConfig.BOT_TOKEN;
     }
 
-    public void handelIncomingMessage(Message message) {
-
-        if (message.getText().equals("حدس")) {
-
-            //TODO : guess
-            sendMessage("***");
-
-        } else if (message.getText().equals("بله") || message.getText().equals("خیر") || message.getText().equals("نمی دانم")) {
-            if (currentState != null && isQuestionExist == true) {
-                currentState.setAnswer(message.getText());
-                history.add(currentState);
-                questionNumber++;
-//                String test = currentState.getBotUsername() + "\n" + "Q = " + currentState.getQuestion() + "\n" + "A = " + currentState.getAnswer() + "\n" + "Q num = " + questionNumber;
-//                sendMessage(test);
-                isQuestionExist = false;
-            }
-
-            if (questionNumber % 20 == 0 && questionNumber != 0) {
-                //TODO : guess
-                sendMessage("***");
-            }
-
-        } else if (helper.isMyTurn(message.getText()) != null) {
-
-            //TODO : send your question
-            String myQuestion = "***";
-            sendNormalQuestion(myQuestion);
-            //TODO : add your Question to history
-            Question question = new Question();
-            question.setQuestion(myQuestion);
-            question.setBotUsername(BotConfig.BOT_USERNAME);
-            currentState = question;
-            isQuestionExist = true;
-
-        } else if (helper.isQuestion(message.getText())) {
-
-            isQuestionExist = true;
-            //question from other bots
-
-        } else if (message.getText().equals("پایان")) {
-
-            //TODO : end of the game
-            sendMessage("guess");
-
-            history.clear();
-            questionNumber = 0;
-            isQuestionExist = false;
-
-        } else if (message.getText().equals("آغاز") || message.getText().equals("اغاز")) {
-
-            //TODO : introduce yourself if you want
-            sendMessage("***");
-
-        }
-
-    }
-
-    //وانهشت
-    public void sendAnswerWithoutOrder(String answer) {
-        SendMessage message = new SendMessage()
-                .setChatId(BotConfig.GROUP_ID)
-                .setText(">>> " + answer);
-        try {
-            sendMessage(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void sendDirectQuestion(String question) {
-        SendMessage message = new SendMessage()
-                .setChatId(BotConfig.GROUP_ID)
-                .setText("* " + question + " ؟");
-        try {
-            sendMessage(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void sendNormalQuestion(String question) {
-        SendMessage message = new SendMessage()
-                .setChatId(BotConfig.GROUP_ID)
-                .setText(question + " ؟");
-        try {
-            sendMessage(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
-    //guess
     public void sendMessage(String text) {
-        SendMessage message = new SendMessage()
+        SendMessage msg = new SendMessage()
                 .setChatId(BotConfig.GROUP_ID)
                 .setText(text);
         try {
-            sendMessage(message);
+            sendMessage(msg);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
     }
 
-    public void sendMessage(String text, long chatId) {
-        SendMessage message = new SendMessage()
-                .setChatId(chatId)
-                .setText(text);
-        try {
-            sendMessage(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
+    public String myIntro() {
+        //TODO : introduce yourself if you want
+        return "اینجا می‌توانید هر پیام یا شعار دلخواهی برای معرفی بنویسید.";
     }
 
+    public String choose_a_question() {
+        //TODO : It is your turn, make or pick a question
+        return "آیا از شاعران است؟";
+    }
+
+    public String make_a_guess() {
+        //TODO : find the most confident guess word
+        return "سعدی";
+    }
+
+    public boolean hasAnyPointForDirectQ() {
+        //TODO : is there any point to ask a direct question
+        return false;
+    }
+
+    public boolean hasAnyPointForVanehasht() {
+        //TODO : is there any point to send a guess and exit
+        return false;
+    }
 }

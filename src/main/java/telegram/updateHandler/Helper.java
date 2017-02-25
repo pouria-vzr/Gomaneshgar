@@ -1,7 +1,6 @@
 package telegram.updateHandler;
 
-import telegram.BotConfig;
-import telegram.model.Question;
+import telegram.model.QResp;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,39 +10,44 @@ import java.util.regex.Pattern;
  */
 public class Helper {
 
-    String questionPattern;
-    String turnPattern;
-    Pattern question;
-    Pattern turn;
+    static Pattern turnPattern = Pattern.compile("([۰-۹]+)\\. @(.+bot)");
+    static Pattern qmsgPattern = Pattern.compile("(.+):\\n(.*؟)");
 
-    public Helper() {
-        questionPattern = "@(.*)bot(.*):(\\n+)([^\\n]*)";
-        turnPattern = "([۱۲۳۴۵۶۷۸۹۰]+). @" + BotConfig.BOT_USERNAME;
-        question = Pattern.compile(questionPattern);
-        turn = Pattern.compile(turnPattern);
-    }
-
-    public String isMyTurn(String message) {
-        Matcher m = turn.matcher(message);
-        if (m.find()) {
-            return m.group(1);
+    static public QResp isTurnMsg(String message) {
+        Matcher m = turnPattern.matcher(message);
+        if (m.matches()) {
+            QResp qrtodo = new QResp();
+            qrtodo.n = parseIntP(m.group(1));
+            qrtodo.asker = m.group(2);
+            return qrtodo;
         } else {
             return null;
         }
     }
 
-    public boolean isQuestion(String message) {
-        Matcher m = question.matcher(message);
-        if (m.find()) {
-            Question question = new Question();
-            question.setQuestion(m.group(m.groupCount()));
-            question.setBotUsername(m.group(1) + "bot");
-            TelegramBot.currentState = question;
-            return true;
+    static public QResp isQMsg(String message) {
+        Matcher m = qmsgPattern.matcher(message);
+        if (m.matches()) {
+            QResp qrongoing = new QResp();
+            qrongoing.asker = m.group(1);
+            qrongoing.question = m.group(2);
+            return qrongoing;
         } else {
-            return false;
+            return null;
         }
-
     }
 
+    static public int parseIntP( String a ){
+        a = a.replaceAll("۰","0");
+        a = a.replaceAll("۱","1");
+        a = a.replaceAll("۲","2");
+        a = a.replaceAll("۳","3");
+        a = a.replaceAll("۴","4");
+        a = a.replaceAll("۵","5");
+        a = a.replaceAll("۶","6");
+        a = a.replaceAll("۷","7");
+        a = a.replaceAll("۸","8");
+        a = a.replaceAll("۹","9");
+        return Integer.parseInt(a);
+    }
 }
