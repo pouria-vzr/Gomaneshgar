@@ -44,10 +44,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                     String guess = make_a_guess();
                     sendMessage(guess);
                 } else if (msgtxt.equals("بله") || msgtxt.equals("خیر") || msgtxt.equals("نمی دانم") || msgtxt.equals("نمیدانم")) {
-                    qr.answer = msgtxt;
+                    qr.setAnswer(msgtxt);
                     history.add(qr);
 
-                    if (qr.n % 20 == 0) {
+                    if (qr.getN() % 20 == 0) {
                         String guess = make_a_guess();
                         sendMessage(guess);
                     } else if (hasAnyPointForVanehasht()) {
@@ -58,9 +58,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                     QResp qrtodo = Helper.isTurnMsg(msgtxt);
                     if (qrtodo != null) {  // A "turn" message received
                         qr = new QResp();
-                        qr.n = qrtodo.n;
-                        qr.asker = qrtodo.asker;
-                        if (qr.asker.equals(BotConfig.BOT_USERNAME)) {  // That is my turn.
+                        qr.setN(qrtodo.getN());
+                        qr.setAsker(qrtodo.getAsker());
+                        if (qr.getAsker().equals(BotConfig.BOT_USERNAME)) {  // That is my turn.
                             String ques;
                             if (hasAnyPointForDirectQ()) {
                                 String guess = make_a_guess();
@@ -73,8 +73,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     } else {
                         QResp qrongoing = Helper.isQMsg(msgtxt);
                         if (qrongoing != null) {  // A "question" received. (copied and resent by admin)
-                            qr.asker = qrongoing.asker;
-                            qr.question = qrongoing.question;
+                            qr.setAsker(qrongoing.getAsker());
+                            qr.setQuestion(qrongoing.getQuestion());
                             if (hasAnyPointForVanehasht()) {
                                 String guess = make_a_guess();
                                 sendMessage(">>> " + guess);
