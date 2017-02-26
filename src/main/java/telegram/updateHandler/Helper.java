@@ -17,8 +17,8 @@ public class Helper {
         Matcher m = turnPattern.matcher(message);
         if (m.matches()) {
             QResp qrtodo = new QResp();
-            qrtodo.n = parseIntP(m.group(1));
-            qrtodo.asker = m.group(2);
+            qrtodo.setN(parseIntP(m.group(1)));
+            qrtodo.setAsker(m.group(2));
             return qrtodo;
         } else {
             return null;
@@ -29,8 +29,8 @@ public class Helper {
         Matcher m = qmsgPattern.matcher(message);
         if (m.matches()) {
             QResp qrongoing = new QResp();
-            qrongoing.asker = m.group(1);
-            qrongoing.question = m.group(2);
+            qrongoing.setAsker(m.group(1));
+            qrongoing.setQuestion(m.group(2));
             return qrongoing;
         } else {
             return null;
