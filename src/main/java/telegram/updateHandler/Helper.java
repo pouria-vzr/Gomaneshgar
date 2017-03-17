@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
  */
 public class Helper {
 
-    static Pattern turnPattern = Pattern.compile("([۰-۹]+)\\. @(.+bot)");
+    static Pattern turnPattern = Pattern.compile("([۰-۹]+)\\. @(.+)");
     static Pattern qmsgPattern = Pattern.compile("(.+):\\n(.*؟)");
 
     static public QResp isTurnMsg(String message) {
