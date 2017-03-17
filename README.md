@@ -1,5 +1,5 @@
 # Gomaneshgar
-Simple Telegram Bot Template For Playing 20 Questions Game
+Simple Telegram Bot Template For Playing 20 Questions Game In Shahid Beheshti University Gomanesh Competition
 
 ##Config
 Use JDK 1.8 or 1.7
